@@ -9,8 +9,8 @@ using System.Collections.Generic;
 
 namespace BlobQuickstartV12
 {
-     class Program
-    {        
+    class Program
+    {
         static async Task Main(string[] args)
         {
             Console.WriteLine("Azure Blob storage v12 - .NET quickstart sample\n");
@@ -25,7 +25,7 @@ namespace BlobQuickstartV12
 
             System.Console.WriteLine("Using connection " + connectionString + "\n");
 
-           // Create a BlobServiceClient object which will be used to create a container client
+            // Create a BlobServiceClient object which will be used to create a container client
             BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
 
             //Create a unique name for the container
@@ -33,16 +33,16 @@ namespace BlobQuickstartV12
 
             // Create the container and return a container client object
             BlobContainerClient containerClient = await blobServiceClient.CreateBlobContainerAsync(containerName);
-            
+
             // Create a local file in the ./data/ directory for uploading and downloading
             string localPath = "./data/";
             string fileName = "quickstart" + Guid.NewGuid().ToString() + ".xml";
             string localFilePath = Path.Combine(localPath, fileName);
 
-            
+
             // Get test xml 
             var booksXml = await File.ReadAllTextAsync("./data/books.xml");
-           
+
             // Write text to the file
             await File.WriteAllTextAsync(localFilePath, booksXml);
 
@@ -100,15 +100,14 @@ namespace BlobQuickstartV12
 
             Console.WriteLine("Done");
         }
-
         static List<T> DeserializeContent<T>(string content, string rootName)
         {
-            if(string.IsNullOrEmpty(content)) return default;
+            if (string.IsNullOrEmpty(content)) return default;
 
             List<T> result;
 
             var xmlSerializer = new XmlSerializer(typeof(List<T>), new XmlRootAttribute(rootName));
-            using(TextReader reader = new StringReader(content))
+            using (TextReader reader = new StringReader(content))
             {
                 result = (List<T>)xmlSerializer.Deserialize(reader);
             }
