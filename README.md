@@ -1,0 +1,2 @@
+# BlobQucikstartV12
+A simple console application demonstrating how to use Azure Blob storage for uploading, listing and downloading content. It follows this tutorial [https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-dotnet](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-dotnet).
