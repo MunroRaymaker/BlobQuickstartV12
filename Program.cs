@@ -4,16 +4,26 @@ using Azure.Storage.Blobs.Models;
 using System.IO;
 using System.Threading.Tasks;
 using System.Text;
+using System.Xml.Serialization;
+using System.Collections.Generic;
 
 namespace BlobQuickstartV12
 {
-    class Program
+     class Program
     {        
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Azure Blob storage v12 - .NET quickstart sample\n");            
-            string connectionString = "TODO";
-            System.Console.WriteLine("Connection is " + connectionString + "\n");
+            Console.WriteLine("Azure Blob storage v12 - .NET quickstart sample\n");
+
+            // Retrieve the connection string for use with the application. The storage
+            // connection string is stored in an environment variable on the machine
+            // running the application called AZURE_STORAGE_CONNECTION_STRING. If the
+            // environment variable is created after the application is launched in a
+            // console or with Visual Studio, the shell or application needs to be closed
+            // and reloaded to take the environment variable into account.
+            string connectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
+
+            System.Console.WriteLine("Using connection " + connectionString + "\n");
 
            // Create a BlobServiceClient object which will be used to create a container client
             BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
@@ -29,15 +39,12 @@ namespace BlobQuickstartV12
             string fileName = "quickstart" + Guid.NewGuid().ToString() + ".xml";
             string localFilePath = Path.Combine(localPath, fileName);
 
+            
+            // Get test xml 
+            var booksXml = await File.ReadAllTextAsync("./data/books.xml");
+           
             // Write text to the file
-            await File.WriteAllTextAsync(localFilePath, 
-            @"  <?xml version'1.0' encoding='UTF-8'?>
-                <note>
-                <to>Tove</to>
-                <from>Jani</from>
-                <heading>Reminder</heading>
-                <body>Don't forget me this weekend!</body>
-                </note>");
+            await File.WriteAllTextAsync(localFilePath, booksXml);
 
             // Get a reference to a blob
             BlobClient blobClient = containerClient.GetBlobClient(fileName);
@@ -59,15 +66,9 @@ namespace BlobQuickstartV12
 
                 using MemoryStream ms = new MemoryStream();
                 blobClient.DownloadTo(ms);
-                var foo = Encoding.UTF8.GetString(ms.ToArray());
+                var content = Encoding.UTF8.GetString(ms.ToArray());
+                var books = DeserializeContent<Book>(content, "catalog");
                 ms.Close();
-
-                // using (var ms = new MemoryStream())
-                // {
-                //     blobClient.DownloadTo(ms);
-                    
-                //     var foo = Encoding.UTF8.GetString(ms.ToArray());   
-                // }
             }
 
             // Download the blob to a local file
@@ -88,7 +89,7 @@ namespace BlobQuickstartV12
 
             // Clean up
             Console.Write("Press any key to begin clean up");
-            //Console.ReadLine();
+            Console.ReadLine();
 
             Console.WriteLine("Deleting blob container...");
             await containerClient.DeleteAsync();
@@ -100,5 +101,19 @@ namespace BlobQuickstartV12
             Console.WriteLine("Done");
         }
 
+        static List<T> DeserializeContent<T>(string content, string rootName)
+        {
+            if(string.IsNullOrEmpty(content)) return default;
+
+            List<T> result;
+
+            var xmlSerializer = new XmlSerializer(typeof(List<T>), new XmlRootAttribute(rootName));
+            using(TextReader reader = new StringReader(content))
+            {
+                result = (List<T>)xmlSerializer.Deserialize(reader);
+            }
+
+            return result;
+        }
     }
 }
